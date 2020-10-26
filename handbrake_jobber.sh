@@ -54,7 +54,7 @@ start_encode(){
   # to create dir structre, coz handbrake doesn't create on its own.
   create_directories "$output_file_path"
   # Echo nothing into handbrakeCLI to ensure its not using the same stdin as the script which. Before which handbrake stops after 1 file exectes.
-  echo "" | HandBrakeCLI -i "$input_file_path" -o "$output_file_path" -e x265 -q 22 -r 60 -w 1920 -l 1080 --verbose=2 >> "$log_path" 2>&1
+  echo "" | HandBrakeCLI -i "$input_file_path" -o "$output_file_path" -e x265 -q 25 -r 60 -w 1920 -l 1080 --verbose=2 >> "$log_path" 2>&1
   HandBrakeCLI_exit_status=$?
   
 }
@@ -71,7 +71,7 @@ move_original(){
           echo "handbrake_jobber SUCCESS: Finished Encoding! Original file is NOT moved."
         else
           # Create the directory structre to preserve the original structure.
-          create_directories "$move_file_dir"
+          create_directories "$move_file_path"
           move_file_dir="$(dirname "$move_file_path")"
           mv "$input_file_path" "$move_file_dir"
           echo "handbrake_jobber SUCCESS: Finished Encoding! Moved the file to new location!"
