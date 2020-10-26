@@ -19,7 +19,7 @@ fi
 # If move_source_dir is not provided echo a warning message
 if [ -z "$move_source_dir" ];
   then
-    echo "handbrake_jobber WARNING: move_source_dir NOT set. Since the original files will not be moved to new location, if you again call the script on the same folder, you will be encoding the files for the second time."
+    echo "handbrake_jobber WARNING: move_source_dir NOT set. Thus calling the script on the same folder, will re-encode the same files."
 fi
 
 
