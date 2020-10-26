@@ -1,5 +1,4 @@
 #!/bin/bash
-
 while getopts i:o:m:l: option; do
   case $option in
     i) input_dir=$OPTARG;;
@@ -100,7 +99,7 @@ convert_each_file(){
 main() {
 # Find files in the given dir and executes a function on each of those files. The file path is 
 # sent as arg to the function.
-find $input_dir -type f -print0 | while IFS= read -r -d '' file; do convert_each_file "$file"; done
+find "$input_dir" -type f -print0 | while IFS= read -r -d '' file; do convert_each_file "$file"; done
 }
 
 main
