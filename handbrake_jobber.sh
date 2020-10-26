@@ -67,9 +67,7 @@ move_original(){
     then
       echo "handbrake_jobber INFO: HandBrakeCLI had an error with file inputDir/${diff}. File will NOT be moved. The script will continue running.."
     else
-      # If move_source_dir is not provided, then move_file_path will also be empty,
-      # then dont move them.
-      if [ -z "$move_file_path" ];
+      if [ -z "$move_source_dir" ];
         then
           echo "handbrake_jobber SUCCESS: Finished Encoding! Original file is NOT moved."
         else
@@ -82,7 +80,6 @@ move_original(){
   fi
 }
 
-
 convert_each_file(){
   input_file_path=$1
   # To maintain the dir structure in the output location, get the difference between input_file_path and input_dir and 
@@ -91,7 +88,6 @@ convert_each_file(){
   # Doesnt matter if we have extra / in any of those variables. //dir///subdir////file is considered the same while executing as /dir/subdir/file 
   output_file_path="$output_dir/$diff"
   move_file_path="$move_source_dir/$diff"
-  
 
   # Not required to call process_wait. Remove if you dont want to use it.
   echo "handbrake_jobber INFO: Encoding file: ${diff}"
