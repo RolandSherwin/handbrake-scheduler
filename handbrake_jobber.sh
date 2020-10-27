@@ -7,20 +7,42 @@ while getopts i:o:m:l: option; do
     l) log_dir=$OPTARG;;
   esac
 done
-# Set log_path to null if log_dir not provided, else have log file with current date
-if [ -z "$log_dir" ];
-  then
-    log_path="/dev/null"
-  else
-    date=$(date +'%F-%R')
-    log_path="$log_dir"/handbrake_jobber-"$date".log
-fi
-# If move_source_dir is not provided echo a warning message
-if [ -z "$move_source_dir" ];
-  then
-    echo "handbrake_jobber WARNING: move_source_dir NOT set. Thus calling the script on the same folder, will re-encode the same files."
+
+if [ -z "$input_dir" ]; then
+  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: input_dir not provided. Use -i \input\dir"
+  exit 2
+elif [ ! -d "$input_dir" ]; then
+  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: input_dir is not a valid path"
+  exit 2
 fi
 
+if [ -z "$output_dir" ]; then
+  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: output_dir not provided. Use -o \output\dir"
+  exit 2
+elif [ ! -d "$output_dir" ]; then
+  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: output_dir is not a valid path"
+  exit 2  
+fi
+
+# Set log_path to null if log_dir not provided, else have log file with current date
+if [ -z "$log_dir" ]; then
+  echo "$(date +'[%R:%S]') handbrake_jobber WARNING: log_dir not provided. Logs will not be saved."
+  log_path="/dev/null"
+elif [ -d "$log_dir" ]; then
+  date=$(date +'%F-%R')
+  log_path="$log_dir"/handbrake_jobber-"$date".log
+else
+  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: log_dir is not a valid path"
+  exit 2
+fi
+
+# If move_source_dir is not provided echo a warning message
+if [ -z "$move_source_dir" ]; then
+  echo "$(date +'[%R:%S]') handbrake_jobber WARNING: move_source_dir NOT set. Thus calling the script on the same folder, will re-encode the same files."
+elif [ ! -d "$move_source_dir" ]; then
+  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: move_source dir is not a valid path"
+  exit 2
+fi
 
 process_wait(){
 # If the any HandbrakeCLI instance is running, wait until it finishes.
@@ -33,10 +55,10 @@ process_wait(){
   if [ ! -z "$processes" ];
     then	
       for i in $processes; do
-        echo "handbrake_jobber INFO: HandbrakeCLI is already running.. waiting" 
+        echo "$(date +'[%R:%S]') handbrake_jobber INFO: HandbrakeCLI is already running.. waiting" 
         tail --pid=$i -f /dev/null
       done
-      echo "handbrake_jobber INFO: Wait finished"
+      echo "$(date +'[%R:%S]') handbrake_jobber INFO: Wait finished"
   fi  
 }
 create_directories() {
@@ -54,7 +76,7 @@ start_encode(){
   # to create dir structre, coz handbrake doesn't create on its own.
   create_directories "$output_file_path"
   # Echo nothing into handbrakeCLI to ensure its not using the same stdin as the script which. Before which handbrake stops after 1 file exectes.
-  echo "" | HandBrakeCLI -i "$input_file_path" -o "$output_file_path" -e x265 -q 25 -r 60 -w 1920 -l 1080 --verbose=2 >> "$log_path" 2>&1
+  echo "" | HandBrakeCLI -i "$input_file_path" -o "$output_file_path" -e x265 -q 23 -r 60 -w 1920 -l 1080 --verbose=2 >> "$log_path" 2>&1
   HandBrakeCLI_exit_status=$?
   
 }
@@ -64,17 +86,17 @@ move_original(){
  
   if [ "$HandBrakeCLI_exit_status" -ne 0 ];
     then
-      echo "handbrake_jobber INFO: HandBrakeCLI had an error with file inputDir/${diff}. File will NOT be moved. The script will continue running.."
+      echo "$(date +'[%R:%S]') handbrake_jobber INFO: HandBrakeCLI had an error with file inputDir/${diff}. File will NOT be moved. The script will continue running.."
     else
       if [ -z "$move_source_dir" ];
         then
-          echo "handbrake_jobber SUCCESS: Finished Encoding! Original file is NOT moved."
+          echo "$(date +'[%R:%S]') handbrake_jobber SUCCESS: Finished Encoding! Original file is NOT moved."
         else
           # Create the directory structre to preserve the original structure.
           create_directories "$move_file_path"
           move_file_dir="$(dirname "$move_file_path")"
           mv "$input_file_path" "$move_file_dir"
-          echo "handbrake_jobber SUCCESS: Finished Encoding! Moved the file to new location!"
+          echo "$(date +'[%R:%S]') handbrake_jobber SUCCESS: Finished Encoding! Moved the file to new location!"
       fi
   fi
 }
@@ -89,7 +111,7 @@ convert_each_file(){
   move_file_path="$move_source_dir/$diff"
 
   # Not required to call process_wait. Remove if you dont want to use it.
-  echo "handbrake_jobber INFO: Encoding file: ${diff}"
+  echo "$(date +'[%R:%S]') handbrake_jobber INFO: Encoding file: ${diff}"
   #process_wait
   start_encode
   move_original
@@ -97,9 +119,11 @@ convert_each_file(){
 }
 
 main() {
-# Find files in the given dir and executes a function on each of those files. The file path is 
+# Find video files in the given dir and executes a function on each of those files. The file path is 
 # sent as arg to the function.
-find "$input_dir" -type f -print0 | while IFS= read -r -d '' file; do convert_each_file "$file"; done
+find "$input_dir" -type f | grep -E "\.webm$|\.flv$|\.vob$|\.ogg$|\.ogv$|\.drc$|\.gifv$|\.mng$|\.avi$|\.mov$|\.qt$|\.wmv$|\.yuv$|\.rm$|\.rmvb$|/.asf$|\.amv$|\.mp4$|\.m4v$|\.mp*$|\.m?v$|\.svi$|\.3gp$|\.flv$|\.f4v$" | while LANG=C IFS= read -r line; do convert_each_file "$line"; done
+
+exit 0
 }
 
 main
