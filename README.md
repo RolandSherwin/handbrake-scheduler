@@ -1,7 +1,5 @@
 # About handbrake_jobber.sh
 
-**DISCLAIMER:** Im new to bash script and I have only tested it a few times. So let me know if there is any bug.
-
 - A bash script to encode video files in a directory and its subdirectories using **HandBrakeCLI**. The output file will also have the same directory structure as the source directory.
 - The files in source directory can be moved to another location or can be sent to /dev/null. This will prevent re-encoding the files again if the script is called on the folder twice. (ie If you schedule it with cronTab etc)
 
