@@ -9,38 +9,38 @@ while getopts i:o:m:l: option; do
 done
 
 if [ -z "$input_dir" ]; then
-  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: input_dir not provided. Use -i \input\dir"
+  echo "$(date +'[%R:%S]') handbrake-scheduler ERROR: input_dir not provided. Use -i \input\dir"
   exit 2
 elif [ ! -d "$input_dir" ]; then
-  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: input_dir is not a valid path"
+  echo "$(date +'[%R:%S]') handbrake-scheduler ERROR: input_dir is not a valid path"
   exit 2
 fi
 
 if [ -z "$output_dir" ]; then
-  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: output_dir not provided. Use -o \output\dir"
+  echo "$(date +'[%R:%S]') handbrake-scheduler ERROR: output_dir not provided. Use -o \output\dir"
   exit 2
 elif [ ! -d "$output_dir" ]; then
-  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: output_dir is not a valid path"
+  echo "$(date +'[%R:%S]') handbrake-scheduler ERROR: output_dir is not a valid path"
   exit 2  
 fi
 
 # Set log_path to null if log_dir not provided, else have log file with current date
 if [ -z "$log_dir" ]; then
-  echo "$(date +'[%R:%S]') handbrake_jobber WARNING: log_dir not provided. Logs will not be saved."
+  echo "$(date +'[%R:%S]') handbrake-scheduler WARNING: log_dir not provided. Logs will not be saved."
   log_path="/dev/null"
 elif [ -d "$log_dir" ]; then
   date=$(date +'%F-%R')
-  log_path="$log_dir"/handbrake_jobber-"$date".log
+  log_path="$log_dir"/handbrake-scheduler-"$date".log
 else
-  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: log_dir is not a valid path"
+  echo "$(date +'[%R:%S]') handbrake-scheduler ERROR: log_dir is not a valid path"
   exit 2
 fi
 
 # If move_source_dir is not provided echo a warning message
 if [ -z "$move_source_dir" ]; then
-  echo "$(date +'[%R:%S]') handbrake_jobber WARNING: move_source_dir NOT set. Thus calling the script on the same folder, will re-encode the same files."
+  echo "$(date +'[%R:%S]') handbrake-scheduler WARNING: move_source_dir NOT set. Thus calling the script on the same folder, will re-encode the same files."
 elif [ ! -d "$move_source_dir" ]; then
-  echo "$(date +'[%R:%S]') handbrake_jobber ERROR: move_source dir is not a valid path"
+  echo "$(date +'[%R:%S]') handbrake-scheduler ERROR: move_source dir is not a valid path"
   exit 2
 fi
 
@@ -55,10 +55,10 @@ process_wait(){
   if [ ! -z "$processes" ];
     then	
       for i in $processes; do
-        echo "$(date +'[%R:%S]') handbrake_jobber INFO: HandbrakeCLI is already running.. waiting" 
+        echo "$(date +'[%R:%S]') handbrake-scheduler INFO: HandbrakeCLI is already running.. waiting" 
         tail --pid=$i -f /dev/null
       done
-      echo "$(date +'[%R:%S]') handbrake_jobber INFO: Wait finished"
+      echo "$(date +'[%R:%S]') handbrake-scheduler INFO: Wait finished"
   fi  
 }
 create_directories() {
@@ -86,17 +86,17 @@ move_original(){
  
   if [ "$HandBrakeCLI_exit_status" -ne 0 ];
     then
-      echo "$(date +'[%R:%S]') handbrake_jobber INFO: HandBrakeCLI had an error with file inputDir/${diff}. File will NOT be moved. The script will continue running.."
+      echo "$(date +'[%R:%S]') handbrake-scheduler INFO: HandBrakeCLI had an error with file inputDir/${diff}. File will NOT be moved. The script will continue running.."
     else
       if [ -z "$move_source_dir" ];
         then
-          echo "$(date +'[%R:%S]') handbrake_jobber SUCCESS: Finished Encoding! Original file is NOT moved."
+          echo "$(date +'[%R:%S]') handbrake-scheduler SUCCESS: Finished Encoding! Original file is NOT moved."
         else
           # Create the directory structre to preserve the original structure.
           create_directories "$move_file_path"
           move_file_dir="$(dirname "$move_file_path")"
           mv "$input_file_path" "$move_file_dir"
-          echo "$(date +'[%R:%S]') handbrake_jobber SUCCESS: Finished Encoding! Moved the file to new location!"
+          echo "$(date +'[%R:%S]') handbrake-scheduler SUCCESS: Finished Encoding! Moved the file to new location!"
       fi
   fi
 }
@@ -111,7 +111,7 @@ convert_each_file(){
   move_file_path="$move_source_dir/$diff"
 
   # Not required to call process_wait. Remove if you dont want to use it.
-  echo "$(date +'[%R:%S]') handbrake_jobber INFO: Encoding file: ${diff}"
+  echo "$(date +'[%R:%S]') handbrake-scheduler INFO: Encoding file: ${diff}"
   #process_wait
   start_encode
   move_original
