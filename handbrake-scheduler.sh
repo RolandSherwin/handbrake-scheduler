@@ -73,16 +73,16 @@ create_directories() {
 
 start_encode(){
 
-  # to create dir structre, coz handbrake doesn't create on its own.
+  # Create dir structre, since handbrake doesn't one create on its own.
   create_directories "$output_file_path"
-  # Echo nothing into handbrakeCLI to ensure its not using the same stdin as the script which. Before which handbrake stops after 1 file exectes.
+  # Echo nothing into handbrakeCLI to ensure its not using the same stdin as the script. Without it, handbrake stops after executing 1 file.
   echo "" | HandBrakeCLI -i "$input_file_path" -o "$output_file_path" -e x265 -q 23 -r 60 -w 1920 -l 1080 --verbose=2 >> "$log_path" 2>&1
   HandBrakeCLI_exit_status=$?
   
 }
 
 move_original(){
-# Only move the original file if HandBrakeCLI exited with exit status = 0. If -m not provided then dont move.  
+# Only move the original file if HandBrakeCLI exited with exit status = 0. If -m not provided then don't move.  
  
   if [ "$HandBrakeCLI_exit_status" -ne 0 ];
     then
@@ -92,7 +92,7 @@ move_original(){
         then
           echo "$(date +'[%R:%S]') handbrake-scheduler SUCCESS: Finished Encoding! Original file is NOT moved."
         else
-          # Create the directory structre to preserve the original structure.
+          # Create the directory structure that is same as the original structure.
           create_directories "$move_file_path"
           move_file_dir="$(dirname "$move_file_path")"
           mv "$input_file_path" "$move_file_dir"
@@ -106,7 +106,7 @@ convert_each_file(){
   # To maintain the dir structure in the output location, get the difference between input_file_path and input_dir and 
   # create output_file_path by joining with the output_dir. 
   diff="${input_file_path#"$input_dir"}"
-  # Doesnt matter if we have extra / in any of those variables. //dir///subdir////file is considered the same while executing as /dir/subdir/file 
+  # Doesn't matter if we have extra / in any of those variables. //dir///subdir////file is considered the same while executing as /dir/subdir/file 
   output_file_path="$output_dir/$diff"
   move_file_path="$move_source_dir/$diff"
 
